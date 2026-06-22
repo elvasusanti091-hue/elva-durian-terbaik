@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SPK SAW - Penilaian Kualitas Durian</title>
+  <link rel="stylesheet" href="style.css" />
+  <script defer src="script.js"></script>
+</head>
+<body>
+  <div class="bg-shape bg-1"></div>
+  <div class="bg-shape bg-2"></div>
+
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">Sistem Pendukung Keputusan</p>
+      <h1>Metode SAW untuk Penilaian Kualitas Durian</h1>
+      <p class="subtitle">
+        15 alternatif, 4 kriteria, perhitungan otomatis, peringkat, dan penyimpanan data ke localStorage.
+      </p>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost" id="btnResetDefault" type="button">Reset Data Default</button>
+      <button class="btn btn-primary" id="btnExportJSON" type="button">Export Data</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div class="hero-card">
+        <div class="stat">
+          <span class="stat-label">Jumlah Alternatif</span>
+          <strong id="statAlternatives">15</strong>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Jumlah Kriteria</span>
+          <strong id="statCriteria">4</strong>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Alternatif Terbaik</span>
+          <strong id="statBest">-</strong>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Nilai Tertinggi</span>
+          <strong id="statBestScore">0</strong>
+        </div>
+      </div>
+    </section>
+
+    <nav class="nav-cards">
+      <a href="#kriteria">Data Kriteria</a>
+      <a href="#alternatif">Data Alternatif</a>
+      <a href="#perhitungan">Proses Perhitungan SPK</a>
+      <a href="#hasil">Hasil Akhir & Peringkat</a>
+    </nav>
+
+    <section class="panel" id="kriteria">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">01</p>
+          <h2>Data Kriteria</h2>
+          <p class="section-desc">Empat kriteria SAW dengan bobot yang bisa diubah dan tersimpan otomatis.</p>
+        </div>
+        <div class="chip">Metode: Benefit</div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="table" aria-label="Data Kriteria">
+          <thead>
+            <tr>
+              <th>Kode</th>
+              <th>Nama Kriteria</th>
+              <th>Jenis</th>
+              <th>Bobot</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="criteriaTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel" id="alternatif">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">02</p>
+          <h2>Data Alternatif</h2>
+          <p class="section-desc">Input data alternatif baru, lalu simpan dan hitung otomatis.</p>
+        </div>
+        <div class="chip">15 Data Awal</div>
+      </div>
+
+      <form class="form-grid" id="alternativeForm">
+        <div class="field">
+          <label for="altName">Nama Alternatif</label>
+          <input id="altName" name="altName" type="text" placeholder="Contoh: Durian Musang King" required />
+        </div>
+        <div class="field">
+          <label for="c1">C1</label>
+          <input id="c1" name="c1" type="number" min="1" max="5" step="1" value="3" required />
+        </div>
+        <div class="field">
+          <label for="c2">C2</label>
+          <input id="c2" name="c2" type="number" min="1" max="5" step="1" value="3" required />
+        </div>
+        <div class="field">
+          <label for="c3">C3</label>
+          <input id="c3" name="c3" type="number" min="1" max="5" step="1" value="3" required />
+        </div>
+        <div class="field">
+          <label for="c4">C4</label>
+          <input id="c4" name="c4" type="number" min="1" max="5" step="1" value="3" required />
+        </div>
+        <div class="field align-end">
+          <button class="btn btn-primary" type="submit">Tambah Alternatif</button>
+        </div>
+      </form>
+
+      <div class="table-wrap">
+        <table class="table" aria-label="Data Alternatif">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Nama Alternatif</th>
+              <th>C1</th>
+              <th>C2</th>
+              <th>C3</th>
+              <th>C4</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="alternativesTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel" id="perhitungan">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">03</p>
+          <h2>Proses Perhitungan SPK</h2>
+          <p class="section-desc">Normalisasi, pembobotan, dan perhitungan nilai akhir SAW.</p>
+        </div>
+        <div class="chip" id="weightSummary">Bobot: 18</div>
+      </div>
+
+      <div class="formula-card">
+        <div>
+          <h3>Rumus</h3>
+          <p>Nilai normalisasi untuk kriteria benefit: <strong>Rij = Xij / Max(Xj)</strong></p>
+          <p>Nilai akhir: <strong>Vi = Σ (Wj × Rij)</strong></p>
+        </div>
+        <div id="criteriaMini"></div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="table" aria-label="Proses Perhitungan SPK">
+          <thead>
+            <tr>
+              <th>Alternatif</th>
+              <th>C1 Normal</th>
+              <th>C2 Normal</th>
+              <th>C3 Normal</th>
+              <th>C4 Normal</th>
+              <th>Skor Akhir</th>
+            </tr>
+          </thead>
+          <tbody id="calculationTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel" id="hasil">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">04</p>
+          <h2>Hasil Akhir & Peringkat</h2>
+          <p class="section-desc">Urutan nilai dari yang tertinggi hingga terendah.</p>
+        </div>
+        <div class="chip success">Alternatif Terbaik Tampil di Sini</div>
+      </div>
+
+      <div class="best-card" id="bestCard">
+        <div>
+          <p class="best-label">Alternatif Terbaik</p>
+          <h3 id="bestName">-</h3>
+          <p id="bestDetail">Belum ada data.</p>
+        </div>
+        <div class="best-score" id="bestScoreCard">0.000</div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="table" aria-label="Hasil dan Peringkat">
+          <thead>
+            <tr>
+              <th>Peringkat</th>
+              <th>Alternatif</th>
+              <th>Skor Akhir</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="rankingTable"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>SPK SAW • LocalStorage • Modern UI</p>
+  </footer>
+</body>
+</html>
